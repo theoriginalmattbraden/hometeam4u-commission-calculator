@@ -38,8 +38,6 @@
         <div id="teamListingWrap" class="field full hidden"><label class="check"><input id="teamListing" type="checkbox"> This is a HomeTeam4U team listing</label></div>
 
         <div id="zillowWrap" class="field full hidden">
-          <label for="zillowMarket">Zillow pricing market <span class="hint">(auto-selected when possible)</span></label>
-          <select id="zillowMarket"></select>
           <div id="zipHint" class="mini"></div>
         </div>
 
@@ -60,18 +58,20 @@
 const SOURCES = [
   ['none','No outside referral / self-generated'],['myagent','My Agent Finder'],['agentpronto','Agent Pronto'],['effective','Effective Agents'],['estately','Estately'],['fastexpert','FastExpert'],['homelight','HomeLight'],['mello','MelloHome'],['refexchange','Referral Exchange'],['sold','Sold.com'],['upnest','UpNest'],['veterans','Veteran\'s United'],['ojo','OJO'],['opcity','OpCity'],['relocation','Stark Relocation'],['starkweb','Stark Web Lead'],['zillow','Zillow Flex / Zillow Preferred'],['other','Other / manual referral']
 ];
-const WI_MARKETS = [
-  ['', 'Select market / pricing group'],['Madison|2','Madison — Group 2'],['Appleton|1','Appleton — Group 1'],['La Crosse-Onalaska|1','La Crosse-Onalaska — Group 1'],['Stevens Point|1','Stevens Point — Group 1'],['Wisconsin Rapids-Marshfield|1','Wisconsin Rapids-Marshfield — Group 1'],['Whitewater-Elkhorn|1','Whitewater-Elkhorn — Group 1'],['Watertown-Fort Atkinson|1','Watertown-Fort Atkinson — Group 1'],['Sheboygan|1','Sheboygan — Group 1'],['Racine|1','Racine — Group 1'],['Platteville|1','Platteville — Group 1'],['Milwaukee-Waukesha-West Allis|1','Milwaukee-Waukesha-West Allis — Group 1'],['Menomonie|1','Menomonie — Group 1'],['Janesville-Beloit|1','Janesville-Beloit — Group 1'],['Fond du Lac|1','Fond du Lac — Group 1'],['Beaver Dam|1','Beaver Dam — Group 1'],['Baraboo|1','Baraboo — Group 1'],['Manual|1','Manual — Group 1'],['Manual|2','Manual — Group 2'],['Manual|3','Manual — Group 3'],['Manual|4','Manual — Group 4'],['Manual|5','Manual — Group 5']
-];
-const MADISON_ZIPS = new Set(['53508','53515','53517','53521','53523','53527','53528','53529','53531','53532','53558','53559','53560','53562','53571','53572','53575','53589','53590','53593','53597','53598']);
-const GROUP1_LOCAL = {
-  '53511':'Janesville-Beloit','53534':'Janesville-Beloit','53536':'Janesville-Beloit','53545':'Janesville-Beloit','53546':'Janesville-Beloit','53548':'Janesville-Beloit','53563':'Janesville-Beloit',
-  '53538':'Watertown-Fort Atkinson','53549':'Watertown-Fort Atkinson','53551':'Watertown-Fort Atkinson','53594':'Watertown-Fort Atkinson','53094':'Watertown-Fort Atkinson','53098':'Watertown-Fort Atkinson',
-  '53115':'Whitewater-Elkhorn','53121':'Whitewater-Elkhorn','53190':'Whitewater-Elkhorn','53147':'Whitewater-Elkhorn','53184':'Whitewater-Elkhorn','53125':'Whitewater-Elkhorn','53191':'Whitewater-Elkhorn','53128':'Whitewater-Elkhorn'
-};
+// Zillow's current Wisconsin pricing table has Madison in Group 2; all other listed Wisconsin markets are Group 1.
+// The ZIP list below covers the Madison, WI CBSA counties (Dane, Columbia, Green, and Iowa).
+const MADISON_MARKET_ZIPS = new Set([
+  // Dane County
+  '53711','53704','53590','53703','53719','53593','53562','53705','53713','53597','53589','53718','53716','53575','53532','53714','53715','53558','53717','53527','53572','53528','53559','53508','53523','53726','53531','53598','53706','53560','53515','53529','53517','53571','53792','53788','53784','53702','53774','53782','53790','53791','53786','53794','53793','53785','53707','53708','53744','53725','53701','53596','53777','53783',
+  // Columbia County
+  '53901','53965','53555','53925','53954','53955','53960','53932','53923','53911','53969','53935','53928','53957',
+  // Green County
+  '53566','53520','53574','53521','53570','53502','53550','53522',
+  // Iowa County
+  '53533','53565','53507','53503','53543','53582','53506','53544','53553','53526','53580','53535','53595'
+]);
 const $ = id => document.getElementById(id);
 SOURCES.forEach(([v,t])=>$('source').add(new Option(t,v)));
-WI_MARKETS.forEach(([v,t])=>$('zillowMarket').add(new Option(t,v)));
 
 function parseDate(v){ if(!v) return null; const [y,m,d]=v.split('-').map(Number); return new Date(y,m-1,d); }
 function addMonths(date, months){ const d=new Date(date); const day=d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+months); const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(); d.setDate(Math.min(day,last)); return d; }
@@ -93,13 +93,19 @@ function pricingPercent(group, price){
   for(const [limit,rate] of bands[group]) if(price < limit) return rate;
   return 40;
 }
-function autoMarket(){
-  const z=$('zip').value.trim(); let value='', msg='';
-  if(/^537\d{2}$/.test(z) || MADISON_ZIPS.has(z)){ value='Madison|2'; msg='Recognized as a common Madison-area ZIP; Pricing Group 2 selected.'; }
-  else if(GROUP1_LOCAL[z]){ value=GROUP1_LOCAL[z]+'|1'; msg='Recognized as '+GROUP1_LOCAL[z]+'; Pricing Group 1 selected.'; }
-  else if(/^5(3|4)\d{3}$/.test(z)){ msg='Wisconsin ZIP not in the built-in local map. Select the Zillow market/group to verify pricing.'; }
-  else if(z.length===5){ msg='ZIP is outside the built-in Wisconsin map. Select the correct pricing group manually.'; }
-  $('zillowMarket').value=value; $('zipHint').textContent=msg;
+function zillowWisconsinPricing(zip){
+  const z=(zip||'').trim();
+  if(!/^5[34]\d{3}$/.test(z)) return null;
+  if(MADISON_MARKET_ZIPS.has(z)) return {market:'Madison',group:2};
+  return {market:'Wisconsin non-Madison',group:1};
+}
+function updateZillowZipHint(){
+  const z=$('zip').value.trim();
+  const p=zillowWisconsinPricing(z);
+  if(!z){ $('zipHint').textContent='Enter the Wisconsin property ZIP code and Zillow pricing will be selected automatically.'; return; }
+  if(!/^\d{5}$/.test(z)){ $('zipHint').textContent='Enter a 5-digit Wisconsin ZIP code.'; return; }
+  if(!p){ $('zipHint').textContent='This calculator currently auto-prices Zillow for Wisconsin ZIP codes only.'; return; }
+  $('zipHint').textContent=`ZIP ${z} → ${p.market} pricing, Group ${p.group}.`;
 }
 function updateConditional(){
   const s=$('source').value, reg=parseDate($('regDate').value);
@@ -108,10 +114,10 @@ function updateConditional(){
   $('historyWrap').classList.toggle('hidden',!(isZ||s==='veterans'||s==='estately'));
   $('teamListingWrap').classList.toggle('hidden',s!=='starkweb'||$('side').value!=='listing');
   $('firstCloseWrap').classList.toggle('hidden',!(isZ && $('txnNumber').value==='second' && zCurrent));
-  if(zCurrent) autoMarket();
+  if(zCurrent) updateZillowZipHint();
 }
 ['source','regDate','side','txnNumber'].forEach(id=>$(id).addEventListener('change',updateConditional));
-$('zip').addEventListener('input',()=>{ if(!$('zillowWrap').classList.contains('hidden')) autoMarket(); });
+$('zip').addEventListener('input',()=>{ if(!$('zillowWrap').classList.contains('hidden')) updateZillowZipHint(); });
 
 function tailOK(reg,close,months){ return onOrBefore(close,addMonths(reg,months)); }
 function getReferral(inputs){
@@ -176,12 +182,12 @@ function getReferral(inputs){
           if(!firstClose) return {error:'Enter the first Zillow transaction closing date for a second transaction.'};
           if(close>addMonths(firstClose,24)) set(0,'Second transaction is more than 2 years after the first transaction.');
           else {
-            const market=$('zillowMarket').value; if(!market) return {error:'Select the Zillow pricing market/group. The ZIP could not be mapped confidently.'};
-            const group=Number(market.split('|')[1]); const r=pricingPercent(group,price); set(r,`${market.split('|')[0]} is Pricing Group ${group}; ${money(price)} falls in the ${r}% tier.`);
+            const zp=zillowWisconsinPricing($('zip').value); if(!zp) return {error:'Enter a valid Wisconsin ZIP code for Zillow pricing.'};
+            const r=pricingPercent(zp.group,price); set(r,`ZIP ${$('zip').value} uses ${zp.market} Pricing Group ${zp.group}; ${money(price)} falls in the ${r}% tier.`);
           }
         } else {
-          const market=$('zillowMarket').value; if(!market) return {error:'Select the Zillow pricing market/group. The ZIP could not be mapped confidently.'};
-          const group=Number(market.split('|')[1]); const r=pricingPercent(group,price); set(r,`${market.split('|')[0]} is Pricing Group ${group}; ${money(price)} falls in the ${r}% tier.`);
+          const zp=zillowWisconsinPricing($('zip').value); if(!zp) return {error:'Enter a valid Wisconsin ZIP code for Zillow pricing.'};
+          const r=pricingPercent(zp.group,price); set(r,`ZIP ${$('zip').value} uses ${zp.market} Pricing Group ${zp.group}; ${money(price)} falls in the ${r}% tier.`);
         }
       }
       break;
@@ -232,7 +238,7 @@ function calculate(){
     <div class="disclaimer"><strong>Disclaimer:</strong> This calculator provides an estimate of your potential commission based on the information provided and the HomeTeam4U reference materials used to build it. It is not a guaranteed or official commission statement. Referral agreements, Success Fees, transaction details, concessions, Stark fees, team splits, and program rules may contain transaction-specific exceptions or may change over time. Final commission amounts should be confirmed with HomeTeam4U/Stark accounting or leadership.</div>`;
 }
 function showError(msg){$('error').textContent=msg;$('error').style.display='block';}
-function reset(){document.querySelectorAll('input').forEach(i=>{if(i.type==='checkbox')i.checked=false;else i.value=''});$('source').value='none';$('side').value='buyer';$('split').value='50';$('concession').value='0';$('txnNumber').value='first';$('zillowMarket').value='';$('result').className='result-empty';$('result').innerHTML='Enter the transaction information and click <strong>Calculate estimate</strong>. The calculator will apply the referral/source fee first, then Stark\'s 10%, the $30 transaction fee, and your team split.';$('error').style.display='none';updateConditional();}
+function reset(){document.querySelectorAll('input').forEach(i=>{if(i.type==='checkbox')i.checked=false;else i.value=''});$('source').value='none';$('side').value='buyer';$('split').value='50';$('concession').value='0';$('txnNumber').value='first';$('result').className='result-empty';$('result').innerHTML='Enter the transaction information and click <strong>Calculate estimate</strong>. The calculator will apply the referral/source fee first, then Stark\'s 10%, the $30 transaction fee, and your team split.';$('error').style.display='none';updateConditional();}
 $('calcBtn').addEventListener('click',calculate);$('resetBtn').addEventListener('click',reset);updateConditional();
 </script>
 </body>
