@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HomeTeam4U Commission Estimator</title>
+  <meta name="description" content="HomeTeam4U commission estimator" />
+  <style>
+    :root{--bg:#f5f6f8;--card:#fff;--ink:#17202a;--muted:#64748b;--line:#dbe2ea;--accent:#b42318;--accent2:#8f1d14;--good:#067647;--warn:#b54708;--soft:#fff7ed}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+    .wrap{max-width:1040px;margin:0 auto;padding:28px 18px 56px}.brand{display:flex;align-items:center;gap:14px;margin-bottom:22px}.mark{width:48px;height:48px;border-radius:12px;background:var(--accent);display:grid;place-items:center;color:#fff;font-weight:850;font-size:21px;letter-spacing:-1px}.brand h1{font-size:26px;margin:0;letter-spacing:-.4px}.brand p{margin:3px 0 0;color:var(--muted);font-size:14px}
+    .layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);gap:18px;align-items:start}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 7px 24px rgba(15,23,42,.05)}.pad{padding:22px}.card h2{margin:0 0 18px;font-size:18px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}label{font-size:13px;font-weight:700;color:#334155}.hint{font-size:12px;color:var(--muted);font-weight:500}input,select{width:100%;border:1px solid #cbd5e1;border-radius:10px;padding:11px 12px;font:inherit;background:#fff;color:var(--ink);outline:none}input:focus,select:focus{border-color:#94a3b8;box-shadow:0 0 0 3px rgba(148,163,184,.18)}.moneywrap{position:relative}.moneywrap span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#64748b}.moneywrap input{padding-left:27px}.hidden{display:none!important}.check{display:flex;gap:8px;align-items:center;padding-top:6px}.check input{width:auto}
+    .actions{display:flex;gap:10px;margin-top:18px}.btn{appearance:none;border:0;border-radius:10px;padding:12px 16px;font-weight:800;cursor:pointer}.primary{background:var(--accent);color:#fff;flex:1}.primary:hover{background:var(--accent2)}.secondary{background:#eef2f6;color:#334155}.error{margin-top:14px;border-radius:10px;padding:11px 12px;background:#fff1f0;border:1px solid #fecdca;color:#912018;font-size:13px;display:none}
+    .result-empty{color:var(--muted);font-size:14px;line-height:1.55}.hero{background:#111827;color:#fff;border-radius:13px;padding:18px;margin-bottom:16px}.hero small{display:block;color:#cbd5e1;font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:11px}.hero .big{font-size:34px;font-weight:900;margin-top:5px;letter-spacing:-1px}.hero .sub{color:#d1d5db;font-size:12px;margin-top:4px}.section{padding:13px 0;border-top:1px solid var(--line)}.section:first-of-type{border-top:0}.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800;margin-bottom:8px}.row{display:flex;justify-content:space-between;gap:16px;padding:4px 0;font-size:14px}.row strong{font-variant-numeric:tabular-nums;text-align:right}.row.total{font-size:16px;font-weight:850;padding-top:8px}.negative{color:#b42318}.reason{font-size:12px;color:var(--muted);line-height:1.5;margin-top:7px}.status{display:inline-flex;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800;margin-top:5px}.status.high{background:#ecfdf3;color:var(--good)}.status.moderate{background:#fffaeb;color:var(--warn)}.status.verify{background:#fff1f0;color:#b42318}.notice{background:var(--soft);border:1px solid #fed7aa;border-radius:10px;padding:10px 12px;color:#9a3412;font-size:12px;line-height:1.45;margin-top:10px}.disclaimer{font-size:11px;line-height:1.5;color:#64748b;margin-top:16px}.footer{text-align:center;color:#94a3b8;font-size:11px;margin-top:20px}.mini{margin-top:7px;color:#64748b;font-size:12px;line-height:1.45}
+    @media(max-width:780px){.layout{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.brand h1{font-size:22px}.hero .big{font-size:30px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><div class="mark">H4U</div><div><h1>HomeTeam4U Commission Estimator</h1><p>Quick estimate based on team referral and commission rules.</p></div></div>
+  <div class="layout">
+    <section class="card pad">
+      <h2>Transaction details</h2>
+      <div class="grid">
+        <div class="field full"><label for="source">Lead source</label><select id="source"></select></div>
+        <div class="field"><label for="regDate">Lead registration date</label><input id="regDate" type="date"></div>
+        <div class="field"><label for="closeDate">Expected / actual closing date</label><input id="closeDate" type="date"></div>
+        <div class="field"><label for="zip">Property ZIP code</label><input id="zip" inputmode="numeric" maxlength="5" placeholder="53716"></div>
+        <div class="field"><label for="side">Transaction side</label><select id="side"><option value="buyer">Buyer</option><option value="listing">Listing / Seller</option></select></div>
+        <div class="field"><label for="price">Purchase / sale price</label><div class="moneywrap"><span>$</span><input id="price" type="number" min="0" step="100" placeholder="425000"></div></div>
+        <div class="field"><label for="commission">Commission on your side</label><input id="commission" type="number" min="0" max="10" step="0.01" placeholder="2.5"><span class="hint">Enter 2.5 for 2.5%</span></div>
+        <div class="field"><label for="split">Your HomeTeam4U split</label><input id="split" type="number" min="0" max="100" step="1" value="50"><span class="hint">Defaults to 50%</span></div>
+        <div class="field"><label for="concession">Commission concession / credit</label><div class="moneywrap"><span>$</span><input id="concession" type="number" min="0" step="1" value="0"></div></div>
+
+        <div id="historyWrap" class="field full hidden"><label for="txnNumber">Transaction number with this referral</label><select id="txnNumber"><option value="first">First transaction</option><option value="second">Second transaction</option><option value="third">Third or later</option></select></div>
+        <div id="firstCloseWrap" class="field full hidden"><label for="firstClose">First transaction closing date</label><input id="firstClose" type="date"></div>
+
+        <div id="teamListingWrap" class="field full hidden"><label class="check"><input id="teamListing" type="checkbox"> This is a HomeTeam4U team listing</label></div>
+
+        <div id="zillowWrap" class="field full hidden">
+          <div id="zipHint" class="mini"></div>
+        </div>
+
+        <div class="field full"><label for="override">Referral fee override % <span class="hint">(optional)</span></label><input id="override" type="number" min="0" max="100" step="0.01" placeholder="Use only if you know the exact fee"><span class="hint">Useful for variable referrals or a fee confirmed in FUB/email.</span></div>
+      </div>
+      <div class="actions"><button class="btn secondary" id="resetBtn" type="button">Reset</button><button class="btn primary" id="calcBtn" type="button">Calculate estimate</button></div>
+      <div id="error" class="error"></div>
+    </section>
+
+    <aside class="card pad" id="resultCard">
+      <h2>Estimated commission</h2>
+      <div id="result" class="result-empty">Enter the transaction information and click <strong>Calculate estimate</strong>. The calculator will apply the referral/source fee first, then Stark's 10%, the $30 transaction fee, and your team split.</div>
+    </aside>
+  </div>
+  <div class="footer">Internal estimate tool • No transaction information is transmitted or stored by this page.</div>
+</div>
+<script>
+const SOURCES = [
+  ['none','No outside referral / self-generated'],['myagent','My Agent Finder'],['agentpronto','Agent Pronto'],['effective','Effective Agents'],['estately','Estately'],['fastexpert','FastExpert'],['homelight','HomeLight'],['mello','MelloHome'],['refexchange','Referral Exchange'],['sold','Sold.com'],['upnest','UpNest'],['veterans','Veteran\'s United'],['ojo','OJO'],['opcity','OpCity'],['relocation','Stark Relocation'],['starkweb','Stark Web Lead'],['zillow','Zillow Flex / Zillow Preferred'],['other','Other / manual referral']
+];
+// Zillow's current Wisconsin pricing table has Madison in Group 2; all other listed Wisconsin markets are Group 1.
+// The ZIP list below covers the Madison, WI CBSA counties (Dane, Columbia, Green, and Iowa).
+const MADISON_MARKET_ZIPS = new Set([
+  // Dane County
+  '53711','53704','53590','53703','53719','53593','53562','53705','53713','53597','53589','53718','53716','53575','53532','53714','53715','53558','53717','53527','53572','53528','53559','53508','53523','53726','53531','53598','53706','53560','53515','53529','53517','53571','53792','53788','53784','53702','53774','53782','53790','53791','53786','53794','53793','53785','53707','53708','53744','53725','53701','53596','53777','53783',
+  // Columbia County
+  '53901','53965','53555','53925','53954','53955','53960','53932','53923','53911','53969','53935','53928','53957',
+  // Green County
+  '53566','53520','53574','53521','53570','53502','53550','53522',
+  // Iowa County
+  '53533','53565','53507','53503','53543','53582','53506','53544','53553','53526','53580','53535','53595'
+]);
+const $ = id => document.getElementById(id);
+SOURCES.forEach(([v,t])=>$('source').add(new Option(t,v)));
+
+function parseDate(v){ if(!v) return null; const [y,m,d]=v.split('-').map(Number); return new Date(y,m-1,d); }
+function addMonths(date, months){ const d=new Date(date); const day=d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+months); const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(); d.setDate(Math.min(day,last)); return d; }
+function onOrBefore(a,b){ return a && b && a.getTime() <= b.getTime(); }
+function between(d,a,b){ return d>=a && d<=b; }
+function pct(v){ return Number(v)/100; }
+function money(v){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(v); }
+function dateLabel(d){ return d ? new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric'}).format(d) : '—'; }
+function sourceLabel(){ return SOURCES.find(x=>x[0]===$('source').value)?.[1] || $('source').value; }
+
+function pricingPercent(group, price){
+  const bands={
+    1:[[75000,15],[150000,25],[225000,30],[300000,35],[Infinity,40]],
+    2:[[100000,15],[200000,25],[300000,30],[400000,35],[Infinity,40]],
+    3:[[125000,15],[250000,25],[375000,30],[500000,35],[Infinity,40]],
+    4:[[175000,15],[350000,25],[525000,30],[700000,35],[Infinity,40]],
+    5:[[225000,15],[450000,25],[675000,30],[900000,35],[Infinity,40]]
+  };
+  for(const [limit,rate] of bands[group]) if(price < limit) return rate;
+  return 40;
+}
+function zillowWisconsinPricing(zip){
+  const z=(zip||'').trim();
+  if(!/^5[34]\d{3}$/.test(z)) return null;
+  if(MADISON_MARKET_ZIPS.has(z)) return {market:'Madison',group:2};
+  return {market:'Wisconsin non-Madison',group:1};
+}
+function updateZillowZipHint(){
+  const z=$('zip').value.trim();
+  const p=zillowWisconsinPricing(z);
+  if(!z){ $('zipHint').textContent='Enter the Wisconsin property ZIP code and Zillow pricing will be selected automatically.'; return; }
+  if(!/^\d{5}$/.test(z)){ $('zipHint').textContent='Enter a 5-digit Wisconsin ZIP code.'; return; }
+  if(!p){ $('zipHint').textContent='This calculator currently auto-prices Zillow for Wisconsin ZIP codes only.'; return; }
+  $('zipHint').textContent=`ZIP ${z} → ${p.market} pricing, Group ${p.group}.`;
+}
+function updateConditional(){
+  const s=$('source').value, reg=parseDate($('regDate').value);
+  const isZ=s==='zillow'; const zCurrent=isZ && reg && reg>=new Date(2024,0,1);
+  $('zillowWrap').classList.toggle('hidden',!zCurrent);
+  $('historyWrap').classList.toggle('hidden',!(isZ||s==='veterans'||s==='estately'));
+  $('teamListingWrap').classList.toggle('hidden',s!=='starkweb'||$('side').value!=='listing');
+  $('firstCloseWrap').classList.toggle('hidden',!(isZ && $('txnNumber').value==='second' && zCurrent));
+  if(zCurrent) updateZillowZipHint();
+}
+['source','regDate','side','txnNumber'].forEach(id=>$(id).addEventListener('change',updateConditional));
+$('zip').addEventListener('input',()=>{ if(!$('zillowWrap').classList.contains('hidden')) updateZillowZipHint(); });
+
+function tailOK(reg,close,months){ return onOrBefore(close,addMonths(reg,months)); }
+function getReferral(inputs){
+  const {source:s,reg,close,price,side,txnNumber,firstClose,override,teamListing}=inputs;
+  let rate=0, reason='No outside referral fee.', confidence='high', notices=[];
+  const set=(r,why,c='high')=>{rate=r;reason=why;confidence=c};
+  const expired=(months)=>!tailOK(reg,close,months);
+
+  if(s==='none') return {rate,reason,confidence,notices};
+  if(s==='other' && override===null) return {error:'Enter the referral fee override % for Other / manual referral.'};
+
+  switch(s){
+    case 'myagent':
+      if(expired(24)) set(0,'Outside the 24-month referral tail.');
+      else if(reg < new Date(2024,9,18)) set(35,'Lead registered before 10/18/2024; using the 35% historical note.','moderate');
+      else {set(40,'Using the current 40% fee shown in Referral Sources.xlsx.','moderate'); notices.push('My Agent Finder also has a price-tier note in the spreadsheet (25% below $150,000 / 35% above). Verify if that note applies to this referral.');}
+      break;
+    case 'agentpronto': expired(24)?set(0,'Outside the 24-month referral tail.'):set(35,'35% referral fee within the 24-month tail.'); break;
+    case 'effective': set(35,'35% referral fee; tail is listed as Forever.'); break;
+    case 'estately':
+      if(expired(36) && txnNumber!=='first') set(0,'Outside 36 months and this is not the first transaction.');
+      else { const r=reg<=new Date(2024,9,4)?30:35; set(r,(r===30?'30% historical rate for registrations on/before 10/4/2024. ':'35% rate for registrations on/after 10/5/2024. ')+(expired(36)?'First transaction remains fee-bearing beyond 36 months.':'Within the 36-month period.')); }
+      break;
+    case 'fastexpert': expired(48)?set(0,'Outside the 4-year referral tail.'):set(25,'25% referral fee within the 4-year tail.'); break;
+    case 'homelight':
+      if(expired(36)) set(0,'Outside HomeLight\'s 36-month referral period.');
+      else { const r=reg<new Date(2022,9,25)?25:33; set(r,r===25?'25% historical HomeLight rate for referrals before 10/25/2022.':'33% HomeLight referral fee within 36 months.'); }
+      break;
+    case 'mello': set(35,'35% referral fee; tail is listed as Forever.'); break;
+    case 'refexchange': set(35,'Spreadsheet lists 35%, but instructs the team to check the original email in FUB.','verify'); notices.push('Check the Referral Exchange email in FUB before relying on this estimate.'); break;
+    case 'sold': set(35,'35% referral fee; tail is listed as Forever.'); break;
+    case 'upnest': expired(24)?set(0,'Outside the 24-month referral tail.'):set(30,'30% referral fee within the 24-month tail.'); if(side==='buyer') notices.push('UpNest spreadsheet notes a buyer incentive if offered; confirm any incentive separately.'); break;
+    case 'veterans':
+      if(!expired(36)) set(35,'35% fee; all transactions within the first 36 months are fee-bearing.');
+      else if(txnNumber==='first') set(35,'First transaction remains fee-bearing even after 36 months.');
+      else set(0,'More than 36 months after registration and not the first transaction.');
+      break;
+    case 'ojo':
+      if(expired(24)) set(0,'Outside the 24-month referral tail.');
+      else if(between(reg,new Date(2023,5,20),new Date(2023,10,14))) set(17.5,'17.5% historical OJO rate for registrations from 6/20/2023 through 11/14/2023.');
+      else set(35,'35% OJO referral fee within the 24-month tail.');
+      break;
+    case 'opcity':
+      if(expired(24)) set(0,'Outside the 24-month referral tail.');
+      else {set(price<150000?30:35,price<150000?'30% OpCity tier for purchase prices under $150,000.':'35% OpCity tier for purchase prices of $150,000 or more.','moderate'); notices.push('The spreadsheet also says OpCity can be “up to 40%.” Verify the specific referral if applicable.');}
+      break;
+    case 'relocation':
+      if(override===null) return {error:'Stark Relocation is listed as a variable fee. Enter the confirmed referral fee in Referral fee override %.'};
+      set(override,'Using the referral fee override you entered.','moderate'); notices.push('Stark Relocation notes a maximum split of 80%.'); break;
+    case 'starkweb':
+      if(side==='listing' && teamListing) set(0,'No fee because this is marked as a HomeTeam4U team listing.');
+      else set(35,'35% Stark Web Lead referral fee; tail is listed as Forever.');
+      break;
+    case 'zillow':
+      if(reg < new Date(2024,0,1)) {
+        if(expired(24)) set(0,'Legacy Zillow Flex lead is outside the 24-month tail.');
+        else set(35,'Legacy Zillow Flex pricing used because registration was before 1/1/2024.');
+      } else {
+        if(txnNumber==='third') set(0,'Zillow Success Fees are due on up to two transactions with the same connection.');
+        else if(txnNumber==='first' && expired(24)) set(0,'First transaction is more than 2 years after the Zillow connection.');
+        else if(txnNumber==='second') {
+          if(!firstClose) return {error:'Enter the first Zillow transaction closing date for a second transaction.'};
+          if(close>addMonths(firstClose,24)) set(0,'Second transaction is more than 2 years after the first transaction.');
+          else {
+            const zp=zillowWisconsinPricing($('zip').value); if(!zp) return {error:'Enter a valid Wisconsin ZIP code for Zillow pricing.'};
+            const r=pricingPercent(zp.group,price); set(r,`ZIP ${$('zip').value} uses ${zp.market} Pricing Group ${zp.group}; ${money(price)} falls in the ${r}% tier.`);
+          }
+        } else {
+          const zp=zillowWisconsinPricing($('zip').value); if(!zp) return {error:'Enter a valid Wisconsin ZIP code for Zillow pricing.'};
+          const r=pricingPercent(zp.group,price); set(r,`ZIP ${$('zip').value} uses ${zp.market} Pricing Group ${zp.group}; ${money(price)} falls in the ${r}% tier.`);
+        }
+      }
+      break;
+  }
+  if(override!==null && !['relocation','other'].includes(s)) { rate=override; reason=`Using your ${override}% referral fee override instead of the standard source rule.`; confidence='moderate'; }
+  if(s==='other') set(override,'Using the manual referral fee you entered.','moderate');
+  return {rate,reason,confidence,notices};
+}
+
+function calculate(){
+  $('error').style.display='none';
+  const reg=parseDate($('regDate').value), close=parseDate($('closeDate').value), firstClose=parseDate($('firstClose').value);
+  const price=Number($('price').value), commission=Number($('commission').value), split=Number($('split').value||50), concession=Number($('concession').value||0);
+  const overrideRaw=$('override').value.trim(), override=overrideRaw===''?null:Number(overrideRaw);
+  const source=$('source').value, zip=$('zip').value.trim(), side=$('side').value, txnNumber=$('txnNumber').value, teamListing=$('teamListing').checked;
+  const errors=[];
+  if(!reg) errors.push('Lead registration date is required.'); if(!close) errors.push('Closing date is required.');
+  if(reg&&close&&close<reg) errors.push('Closing date cannot be before the lead registration date.');
+  if(!/^\d{5}$/.test(zip)) errors.push('Enter a 5-digit property ZIP code.'); if(!(price>0)) errors.push('Enter a purchase/sale price.');
+  if(!(commission>0)) errors.push('Enter the agent-side commission percentage.'); if(split<0||split>100) errors.push('Team split must be between 0 and 100%.');
+  if(concession<0) errors.push('Concession cannot be negative.'); if(override!==null&&(override<0||override>100)) errors.push('Referral override must be between 0 and 100%.');
+  if(errors.length){ showError(errors.join(' ')); return; }
+  const ref=getReferral({source,reg,close,price,side,txnNumber,firstClose,override,teamListing}); if(ref.error){showError(ref.error);return;}
+  const gross=price*pct(commission), afterConcession=Math.max(0,gross-concession), referralFee=afterConcession*pct(ref.rate), afterReferral=afterConcession-referralFee, stark=afterReferral*.10, tx=30, net=afterReferral-stark-tx, agent=net*pct(split), team=net-agent;
+  const notices=[...(ref.notices||[])];
+  if(source==='zillow'&&concession>0) notices.push('Zillow only allows certain customer-paid incentives/rebates to reduce GCI. Confirm this concession qualifies before relying on the Success Fee estimate.');
+  const c=ref.confidence==='verify'?'Needs Verification':ref.confidence==='moderate'?'Confidence: Moderate':'Confidence: High';
+  const cls=ref.confidence==='verify'?'verify':ref.confidence==='moderate'?'moderate':'high';
+  $('result').className='';
+  $('result').innerHTML=`
+    <div class="hero"><small>Estimated agent commission</small><div class="big">${money(agent)}</div><div class="sub">Team split used: ${split}%</div></div>
+    <div class="section"><div class="section-title">Transaction</div>
+      <div class="row"><span>Property ZIP</span><strong>${zip}</strong></div><div class="row"><span>Purchase / sale price</span><strong>${money(price)}</strong></div><div class="row"><span>Commission</span><strong>${commission}%</strong></div><div class="row"><span>Gross commission</span><strong>${money(gross)}</strong></div>
+    </div>
+    <div class="section"><div class="section-title">Commission adjustment</div>
+      <div class="row"><span>Concession / credit</span><strong class="negative">-${money(concession)}</strong></div><div class="row"><span>After concession</span><strong>${money(afterConcession)}</strong></div>
+    </div>
+    <div class="section"><div class="section-title">Referral / success fee</div>
+      <div class="row"><span>Lead source</span><strong>${sourceLabel()}</strong></div><div class="row"><span>Registration date</span><strong>${dateLabel(reg)}</strong></div><div class="row"><span>Applicable fee</span><strong>${ref.rate}%</strong></div><div class="row"><span>Referral / success fee</span><strong class="negative">-${money(referralFee)}</strong></div><div class="reason">${ref.reason}</div><div class="row"><span>Commission after referral</span><strong>${money(afterReferral)}</strong></div>
+    </div>
+    <div class="section"><div class="section-title">Brokerage / transaction costs</div>
+      <div class="row"><span>Stark 10%</span><strong class="negative">-${money(stark)}</strong></div><div class="row"><span>Transaction fee</span><strong class="negative">-${money(tx)}</strong></div><div class="row total"><span>Net before team split</span><strong>${money(net)}</strong></div>
+    </div>
+    <div class="section"><div class="section-title">HomeTeam4U split</div>
+      <div class="row"><span>Agent split</span><strong>${split}%</strong></div><div class="row"><span>Estimated team portion</span><strong>${money(team)}</strong></div><div class="row total"><span>Estimated agent commission</span><strong>${money(agent)}</strong></div>
+      <div class="status ${cls}">${c}</div>${notices.map(n=>`<div class="notice">${n}</div>`).join('')}
+    </div>
+    <div class="disclaimer"><strong>Disclaimer:</strong> This calculator provides an estimate of your potential commission based on the information provided and the HomeTeam4U reference materials used to build it. It is not a guaranteed or official commission statement. Referral agreements, Success Fees, transaction details, concessions, Stark fees, team splits, and program rules may contain transaction-specific exceptions or may change over time. Final commission amounts should be confirmed with HomeTeam4U/Stark accounting or leadership.</div>`;
+}
+function showError(msg){$('error').textContent=msg;$('error').style.display='block';}
+function reset(){document.querySelectorAll('input').forEach(i=>{if(i.type==='checkbox')i.checked=false;else i.value=''});$('source').value='none';$('side').value='buyer';$('split').value='50';$('concession').value='0';$('txnNumber').value='first';$('result').className='result-empty';$('result').innerHTML='Enter the transaction information and click <strong>Calculate estimate</strong>. The calculator will apply the referral/source fee first, then Stark\'s 10%, the $30 transaction fee, and your team split.';$('error').style.display='none';updateConditional();}
+$('calcBtn').addEventListener('click',calculate);$('resetBtn').addEventListener('click',reset);updateConditional();
+</script>
+</body>
+</html>
